@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: billing-job
+
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/batch_db
+    username: batch_user
+    password: batch_password
+    driver-class-name: org.postgresql.Driver
+
+  batch:
+    jdbc:
+      initialize-schema: always
+
+logging:
+  level:
+    org.springframework.batch: INFO
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+
