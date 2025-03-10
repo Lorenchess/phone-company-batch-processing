@@ -1,6 +1,7 @@
 package com.spring_batch.billing_job.error_handler;
 
 import com.spring_batch.billing_job.entity.BillingData;
+import lombok.NonNull;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.item.file.FlatFileParseException;
 
@@ -18,7 +19,7 @@ public class BillingDataSkipListener implements SkipListener<BillingData, Billin
     }
 
     @Override
-    public void onSkipInRead(Throwable throwable) {
+    public void onSkipInRead(@NonNull Throwable throwable) {
         if (throwable instanceof FlatFileParseException exception) {
             String rawLine = exception.getInput();
             int lineNumber = exception.getLineNumber();
