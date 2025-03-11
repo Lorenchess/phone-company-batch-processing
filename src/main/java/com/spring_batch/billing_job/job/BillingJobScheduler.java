@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@RequiredArgsConstructor
 public class BillingJobScheduler {
 
     private final JobLauncher jobLauncher;
@@ -25,14 +24,19 @@ public class BillingJobScheduler {
     private static final String INPUT_DIR = "input/";
     private static final String OUTPUT_DIR = "staging/";
 
+    public BillingJobScheduler(JobLauncher jobLauncher, Job billingJob) {
+        this.jobLauncher = jobLauncher;
+        this.billingJob = billingJob;
+    }
+
     @Scheduled(cron = "0 0 0 L * ?")
     public void runScheduleBillingJob() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = getCurrentDate();
         int currentYear = today.getYear();
         int currentMonth = today.getMonthValue();
 
-        String expectedFileName = String.format("billing-%d-%02d.csv", currentYear, currentMonth);
-        File inputFile = new File(INPUT_DIR + expectedFileName);
+
+        File inputFile = getBillingFile(currentYear, currentMonth);
 
         if (inputFile.exists()) {
             try {
@@ -41,7 +45,7 @@ public class BillingJobScheduler {
                 System.out.println("Failed to execute the job " + e.getMessage());
             }
         } else {
-            System.out.println("No matching file found for this month's billing cycle: " + expectedFileName);
+            System.out.println("No matching file found for this month's billing cycle: " + getExpectedFileName(currentYear, currentMonth));
         }
     }
 
@@ -49,7 +53,7 @@ public class BillingJobScheduler {
         System.out.println("Processing file: " + file.getName());
 
         String outputFile = OUTPUT_DIR + "billing-report-" + file.getName();
-        String skipFile = OUTPUT_DIR + "billing-data-skip" + file.getName().replace(".csv", ".psv");
+        String skipFile = OUTPUT_DIR + "billing-data-skip-" + file.getName().replace(".csv", ".psv");
 
         Map<String, JobParameter<?>> jobParams = new HashMap<>();
         jobParams.put("input.file", new JobParameter<>(file.getAbsolutePath(), String.class));
@@ -61,6 +65,21 @@ public class BillingJobScheduler {
 
         JobParameters jobParameters = new JobParameters(jobParams);
         this.jobLauncher.run(this.billingJob, jobParameters);
+    }
+
+    public File getBillingFile(int year, int month) {
+        String fileName = String.format("billing-%d-%02d.csv", year, month);
+        return new File(INPUT_DIR + fileName);
+    }
+
+    private String getExpectedFileName(int year, int month) {
+        String expectedFileName = String.format("billing-%d-%02d.csv", year, month);
+        System.out.println("Processing file: " + expectedFileName);
+        return expectedFileName;
+    }
+
+    protected LocalDate getCurrentDate() {
+        return LocalDate.now();
     }
 
 
