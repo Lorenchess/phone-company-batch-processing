@@ -24,11 +24,17 @@ public class GlobalErrorHandler {
     }
 
     private ResponseEntity<CustomErrorResponse> buildErrorResponse(Exception exception, HttpStatus status, List<String> details) {
-        CustomErrorResponse customErrorResponse = CustomErrorResponse.builder()
-                .message(exception.getMessage() != null ? exception.getMessage() : "Unexpected Error occurred")
-                .details(details != null && !details.isEmpty() ? details : null)
-                .status(status.value())
-                .build();
+        //some problems with lombok library with latest intellij
+//        CustomErrorResponse customErrorResponse = CustomErrorResponse.builder()
+//                .message(exception.getMessage() != null ? exception.getMessage() : "Unexpected Error occurred")
+//                .details(details != null && !details.isEmpty() ? details : null)
+//                .status(status.value())
+//                .build();
+
+        CustomErrorResponse customErrorResponse = new CustomErrorResponse();
+        customErrorResponse.setMessage(exception.getMessage() != null ? exception.getMessage() : "Unexpected Error occurred");
+        customErrorResponse.setDetails(details != null && !details.isEmpty() ? details : null);
+        customErrorResponse.setStatus(status.value());
         return ResponseEntity.status(status).body(customErrorResponse);
     }
 }
